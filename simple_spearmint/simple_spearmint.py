@@ -51,9 +51,13 @@ class SimpleSpearmint(object):
             parameter_space[name] = spec
         # Convert the "noiseless" bool flag to Spearmint's string semantics
         noiseless = 'NOISELESS' if noiseless else 'GAUSSIAN'
+        # Names are different for noisy/noiseless in the NaN-to-constraint task
+        nan_likelihood = 'STEP' if noiseless else 'BINOMIAL'
         # Set up task configuration dict
         self.task_config = {'main': {'type': 'objective',
-                                     'likelihood': noiseless}}
+                                     'likelihood': noiseless},
+                            'NaN': {'type': 'CONSTRAINT',
+                                    'likelihood': nan_likelihood}}
         # Create a "task group" for this experiment
         self.task_group = spearmint.tasks.task_group.TaskGroup(
             self.task_config, parameter_space)
@@ -119,7 +123,11 @@ class SimpleSpearmint(object):
             [self.task_group.vectorify(self.spec_parameter_values(values))
              for values in self.parameter_values])
         # Update the task group with the objective value
-        self.task_group.values = {'main': np.array(self.objective_values)}
+        self.task_group.values = {
+            'main': np.array(self.objective_values),
+            # For some reason, the NaN task gets True values for non-NaN values
+            # See spearmint.tasks.TaskGroup.add_nan_task_if_nans
+            'NaN': np.logical_not(np.isnan(self.objective_values))}
 
     def suggest(self):
         """ Generate a new parameter suggestion.
