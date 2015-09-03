@@ -69,7 +69,7 @@ class SimpleSpearmint(object):
         # We need to persistently store the model hyperparameters
         self.hypers = None
         self.debug = debug
-        # Store the parameter specification (currently used in suggest_random)
+        # Store the parameter specification
         self.parameter_space = parameter_space
 
     def spec_parameter_values(self, parameter_values):
@@ -157,6 +157,13 @@ class SimpleSpearmint(object):
         # forces you to use
         suggestion = dict((name, value['values'][0])
                           for name, value in suggestion.items())
+        # Force-cast parameters to their correct types
+        for name, value in suggestion.items():
+            if self.parameter_space[name]['type'] == 'int':
+                suggestion[name] = int(value)
+            if self.parameter_space[name]['type'] == 'float':
+                suggestion[name] = float(value)
+            # Ignore enums, we don't know what their type is
         return suggestion
 
     def suggest_random(self):
