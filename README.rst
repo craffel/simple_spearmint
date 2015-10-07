@@ -28,16 +28,27 @@ Example
       elif function == 'cos':
           return np.cos(x)**y - y
 
+  # Seed with 5 randomly chosen parameter settings
+  # (this step is optional, but can be beneficial)
+  for n in xrange(5):
+      # Get random parameter settings
+      suggestion = ss.suggest_random()
+      # Retrieve an objective value for these parameters
+      value = objective(suggestion['x'],
+                        suggestion['y'],
+                        suggestion['function'])
+      print "Random trial {}: {} -> {}".format(n + 1, suggestion, value)
+      # Update the optimizer on the result
+      ss.update(suggestion, value)
+
   # Run for 100 hyperparameter optimization trials
   for n in xrange(100):
       # Get a suggestion from the optimizer
       suggestion = ss.suggest()
-      # Retrieve an objective value for these parameters
-      # We could also call objective(**suggestion)
-      value = objective(suggestion['x'],
-                        suggestion['y'],
-                        suggestion['function'])
-      print suggestion, value
+      # Get an objective value; the ** syntax is equivalent to
+      # the call to objective above
+      value = objective(**suggestion)
+      print "GP trial {}: {} -> {}".format(n + 1, suggestion, value)
       # Update the optimizer on the result
       ss.update(suggestion, value)
   best_parameters, best_objective = ss.get_best_parameters()
