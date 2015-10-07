@@ -187,7 +187,8 @@ class SimpleSpearmint(object):
                     low=spec['min'], high=spec['max']))
             # In enum, sample from options using choice
             elif spec['type'] == 'enum':
-                suggestion[name] = str(np.random.choice(spec['options']))
+                suggestion_index = np.random.choice(len(spec['options']))
+                suggestion[name] = spec['options'][suggestion_index]
             # Raise an error if another type was specified
             else:
                 raise ValueError('Parameter type {} is not valid.'.format(
