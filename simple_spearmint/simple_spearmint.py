@@ -179,15 +179,16 @@ class SimpleSpearmint(object):
         for name, spec in self.parameter_space.items():
             # Sample floats from np.random.uniform
             if spec['type'] == 'float':
-                suggestion[name] = np.random.uniform(
-                    low=spec['min'], high=spec['max'])
+                suggestion[name] = float(np.random.uniform(
+                    low=spec['min'], high=spec['max']))
             # Sample ints from np.random.random_integers
             elif spec['type'] == 'int':
-                suggestion[name] = np.random.random_integers(
-                    low=spec['min'], high=spec['max'])
+                suggestion[name] = int(np.random.random_integers(
+                    low=spec['min'], high=spec['max']))
             # In enum, sample from options using choice
             elif spec['type'] == 'enum':
-                suggestion[name] = np.random.choice(spec['options'])
+                suggestion_index = np.random.choice(len(spec['options']))
+                suggestion[name] = spec['options'][suggestion_index]
             # Raise an error if another type was specified
             else:
                 raise ValueError('Parameter type {} is not valid.'.format(
