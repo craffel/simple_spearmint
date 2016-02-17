@@ -208,6 +208,6 @@ class SimpleSpearmint(object):
             The lowest objective function value achieved.
         """
         # Retrieve the index of the lowest objective value
-        best_objective = np.argmin(self.objective_values)
+        best_objective = np.nanargmin(self.objective_values)
         return (self.parameter_values[best_objective],
                 self.objective_values[best_objective])
