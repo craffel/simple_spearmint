@@ -1,1 +1,1 @@
-from simple_spearmint import *
+from .simple_spearmint import *
