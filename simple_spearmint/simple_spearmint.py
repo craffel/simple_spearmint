@@ -27,6 +27,12 @@ class SimpleSpearmint(object):
 
     debug : bool
         Whether to allow Spearmint to print debug information to stderr.
+        
+    minimize : bool
+        Whether Spearmint should minimize the objective. Default inherited from
+        the behaviour of spearmint.choosers.default_chooser is to minimize, set
+        minimize=False to maximize the objective.
+        
 
     Examples
     --------
@@ -43,7 +49,8 @@ class SimpleSpearmint(object):
 
     """
 
-    def __init__(self, parameter_space, noiseless=False, debug=False):
+    def __init__(self, parameter_space, noiseless=False, debug=False, 
+                 minimize=True):
         # Add the 'size' key to each entry in the parameter space.
         # We assume all parameters are size 1, which is reasonable.
         for name, spec in parameter_space.items():
@@ -69,6 +76,7 @@ class SimpleSpearmint(object):
         # We need to persistently store the model hyperparameters
         self.hypers = None
         self.debug = debug
+        self.minimize = minimize
         # Store the parameter specification
         self.parameter_space = parameter_space
 
@@ -119,7 +127,10 @@ class SimpleSpearmint(object):
         """
         # Add this parameter setting and objective value to our list of trials
         self.parameter_values.append(parameter_values)
-        self.objective_values.append(objective_value)
+        if not self.minimize:
+            self.objective_values.append(-1.0 * objective_value)
+        else:
+            self.objective_values.append(objective_value)
         # Update the task group with these parameter settings
         self.task_group.inputs = np.array(
             [self.task_group.vectorify(self.spec_parameter_values(values))
@@ -205,9 +216,14 @@ class SimpleSpearmint(object):
             corresponding to the trial with the lowest objective value.
 
         objective_value : float
-            The lowest objective function value achieved.
+            The best objective function value achieved, which is the
+            minimum of objective function, unless self.maximize=True
         """
         # Retrieve the index of the lowest objective value
         best_objective = np.nanargmin(self.objective_values)
+        if not self.minimize:
+            best_objective_value = -1.0 * self.objective_values[best_objective]
+        else:
+            best_objective_value = self.objective_values[best_objective]
         return (self.parameter_values[best_objective],
-                self.objective_values[best_objective])
+                best_objective_value)
